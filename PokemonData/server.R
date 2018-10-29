@@ -16,7 +16,6 @@ library(ggplot2)
 pokeData = read_csv("pokemon.csv")
 pokeData[is.na(pokeData)] = "None"
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
   
   # Download button for the table display - not finished

@@ -22,23 +22,18 @@ shinyServer(function(input, output, session) {
   #reactive value to adjust displayed data
   displayData <- reactive({
     
-    #data has not been adjusted
-    if(!input$modified){        
+    if(!input$modified){ #data has not been adjusted     
       newData <- pokeData
     }
     
-    #data has been adjusted to meet specifications given by user
-    else{
-      newData <- pokeData[pokeData$'Type 1'== input$type1
-                          & pokeData$'Type 2'== input$type2
-                          & pokeData$HP>input$hp
-                          & pokeData$Attack>input$att
-                          & pokeData$Defense>input$def
-                          & pokeData$Speed>input$spd
-                          & pokeData$'Sp. Atk'>input$spAtt
-                          & pokeData$'Sp. Def'>input$spDef,]
+    else{ #data has been adjusted to meet specifications given by user
+      newData <- pokeData[pokeData$'Type 1'== input$type1 & pokeData$'Type 2'== input$type2
+                          & pokeData$HP>input$hp & pokeData$Attack>input$att
+                          & pokeData$Defense>input$def & pokeData$Speed>input$spd
+                          & pokeData$'Sp. Atk'>input$spAtt & pokeData$'Sp. Def'>input$spDef,]
     }
   })
+  
   
   # Download button for the table display
   output$dlData <- downloadHandler(
@@ -48,6 +43,7 @@ shinyServer(function(input, output, session) {
     },
     contentType = "csv"
   )
+  
   
   # Download button for the histogram plot
   output$dlPng <- downloadHandler(
@@ -86,10 +82,10 @@ shinyServer(function(input, output, session) {
     
     #gets data to display
     plotData <- displayData()
-    
-    #creates plots comparing total attack to total defense
-    g <- ggplot(plotData,aes(x = Attack+`Sp. Atk`+Speed, y = Defense+`Sp. Def`+HP))
-    g + geom_point(size = 2) + xlab("Combined Attack Stats") + ylab("Combined Defense Stats")
+
+    # creates plots comparing total attack to total defense
+    g <- ggplot(plotData, aes(x = Attack + Speed + `Sp. Atk`, y = HP + Defense + `Sp. Def`))
+    g + geom_point() + xlab("Combined Attack Stats") + ylab("Combined Defense Stats")
   })
   
   # table for pokemon data
@@ -98,7 +94,12 @@ shinyServer(function(input, output, session) {
   })
   
   # Shows location of cursor for data in the attack/defense plot
-  output$location <- renderText({
-    paste0("x=", input$plotClick$x, "\ny=", input$plotClick$y)
+  output$pokeInfo <- renderText({
+    paste0("Total Attack=", input$plotClick$x, "\nTotal Defense=", input$plotClick$y)
+  })
+  
+  output$webLink <- renderUI({
+    url <- a("the Hackathon challenge", href="https://www.kaggle.com/terminus7/pokemon-challenge")
+    tagList("Data set was provided from kaggle by T7 as part of ", url)
   })
 })

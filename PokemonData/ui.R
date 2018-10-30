@@ -39,9 +39,21 @@ shinyUI(fluidPage(
       downloadButton("dlData", "Download Pokemon List")
     ),
     
-    # Show a plot of the relevent pokemon
+    # Show a plot of the relevant pokemon
     mainPanel(
-       tableOutput("list") #displays pokemon data
+      tabsetPanel(
+        tabPanel("Stats of Pokemon",tableOutput("list")), #displays pokemon data
+        tabPanel("Plot of Stat Totals", plotOutput("statTotPlot"), #displays histogram of stat totals of described pokemon
+                 downloadButton("dlPng", "Download Histogram")), 
+        tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"), #displays plots display stat trends
+                 verbatimTextOutput("location")), 
+        tabPanel("Information", #displays information about the app
+                 h3("Pokemon Data Organizer for NCSU ST590"),
+                 paste0("This App was constructed by Tim MacNeil for Project 2 of the NCSU ST590 course in Fall 2018.", 
+                 "It loads a data file of information pertinent to pokemon.  It allows the user to sort through the ", 
+                 "data based on specifications to find the desired pokemon.  It also creates graphical displays to ",
+                 "compare the total stats and the combined offense and defense"))
+      )
     )
   )
 ))

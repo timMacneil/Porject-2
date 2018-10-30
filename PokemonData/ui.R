@@ -47,12 +47,16 @@ shinyUI(fluidPage(
                  downloadButton("dlPng", "Download Histogram")), 
         tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"), #displays plots display stat trends
                  verbatimTextOutput("location")), 
+<<<<<<< HEAD
         tabPanel("Information", #displays information about the app
                  h3("Pokemon Data Organizer for NCSU ST590"),
                  paste0("This App was constructed by Tim MacNeil for Project 2 of the NCSU ST590 course in Fall 2018.", 
                  "It loads a data file of information pertinent to pokemon.  It allows the user to sort through the ", 
                  "data based on specifications to find the desired pokemon.  It also creates graphical displays to ",
                  "compare the total stats and the combined offense and defense"))
+=======
+        tabPanel("Information",textOutput("Info")) #displays information about the app
+>>>>>>> 3a727f1d1b9c7097d9a8ee93b7bb1587d0a3cddf
       )
     )
   )

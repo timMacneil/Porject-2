@@ -101,5 +101,4 @@ shinyServer(function(input, output, session) {
   output$location <- renderText({
     paste0("x=", input$plotClick$x, "\ny=", input$plotClick$y)
   })
-  
 })

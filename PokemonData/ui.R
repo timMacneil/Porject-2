@@ -39,9 +39,16 @@ shinyUI(fluidPage(
       downloadButton("dlData", "Download Pokemon List")
     ),
     
-    # Show a plot of the relevent pokemon
+    # Show a plot of the relevant pokemon
     mainPanel(
-       tableOutput("list") #displays pokemon data
+      tabsetPanel(
+        tabPanel("Stats of Pokemon",tableOutput("list")), #displays pokemon data
+        tabPanel("Plot of Stat Totals", plotOutput("statTotPlot"), #displays histogram of stat totals of described pokemon
+                 downloadButton("dlPng", "Download Histogram")), 
+        tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"), #displays plots display stat trends
+                 verbatimTextOutput("location")), 
+        tabPanel("Information",textOutput("Info")) #displays information about the app
+      )
     )
   )
 ))

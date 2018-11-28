@@ -10,6 +10,7 @@
 library(shiny)
 library(tidyverse)
 library(ggplot2)
+library(tree)
 
 # Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
 # is only one type.  This translates that appropriately for the data.
@@ -45,7 +46,10 @@ shinyUI(fluidPage(
         tabPanel("Histogram of Stat Totals", plotOutput("statTotPlot"), #displays histogram of stat totals of described pokemon
                  downloadButton("dlPng", "Download Histogram")), 
         tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"), #displays plots display stat trends
-                 verbatimTextOutput("pokeInfo")), 
+                 verbatimTextOutput("pokeInfo")),
+        tabPanel("Supervised Learning 1", plotOutput("statSupLearn1")),
+        tabPanel("Supervised Learning 2"),
+        tabPanel("Unsupervised Learning"),
         tabPanel("Information", #displays information about the app
                  h2("Pokemon Data Organizer for Project 2 of NCSU ST590 Fall 2018"),
                  p("This App was constructed by Tim MacNeil for Project 2 of the NCSU ST590 course in Fall 2018.", 

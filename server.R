@@ -10,6 +10,7 @@
 library(shiny)
 library(tidyverse)
 library(ggplot2)
+library(tree)
 
 # Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
 # is only one type.  This translates that appropriately for the data.
@@ -75,6 +76,20 @@ shinyServer(function(input, output, session) {
     bins <- seq( min(statTotals), max(statTotals), length.out = 20)
     hist(statTotals, breaks = bins, xlab = "Stat Total for Pokemon",
          main = "Histogram of Stat Totals")
+  })
+  
+  #Creates Tree of stat totals
+  output$statSupLearn1 <- renderPlot({
+    
+    #gets data to display and establishes stat total for each pokemon
+    plotData <- displayData()
+    statTotals <- plotData$Attack + plotData$Defense + plotData$Speed + 
+      plotData$HP + plotData$'Sp. Atk' + plotData$'Sp. Def'
+    
+    #creates tree
+    fitTree <- tree(Attack~Defense, data = plotData)
+    plot(fitTree)
+    text(fitTree)
   })
   
   #creates plots for attack and defense of the pokemon currently selected

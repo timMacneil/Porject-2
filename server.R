@@ -112,14 +112,14 @@ shinyServer(function(input, output, session) {
     }
     else if(input$treeStat == 'Sp. Atk')
     {
-      fitTree <- tree(statTotal~ pokeData'Sp. Atk', data = plotData)
+      fitTree <- tree(statTotal~ pokeData$'Sp. Atk', data = plotData)
     }
     else
     {
       fitTree <- tree(statTotal~ pokeData$'Sp. Def', data = plotData)     
     }
     plot(fitTree)
-    text(fitTree)
+    text(fitTree, splits = FALSE, digits = 3)
   })
   
   #creates plots for attack and defense of the pokemon currently selected

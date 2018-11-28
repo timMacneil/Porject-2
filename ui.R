@@ -13,9 +13,11 @@ library(ggplot2)
 library(tree)
 
 # Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
-# is only one type.  This translates that appropriately for the data.
+# is only one type.  This translates that appropriately for the data.  Also adds a Total Statistic setting.
 pokeData = read_csv("pokemon.csv")
 pokeData[is.na(pokeData)] = "None"
+pokeData <- mutate(pokeData, statTotal = Attack + Defense + Speed + HP 
+                                         + pokeData$'Sp. Def' + pokeData$'Sp. Atk') 
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -47,8 +49,9 @@ shinyUI(fluidPage(
                  downloadButton("dlPng", "Download Histogram")), 
         tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"), #displays plots display stat trends
                  verbatimTextOutput("pokeInfo")),
-        tabPanel("Supervised Learning 1", plotOutput("statSupLearn1")),
-        tabPanel("Supervised Learning 2"),
+        tabPanel("Stat Total Tree", plotOutput("statSupLearn1"),  #displays Stat Total tree based off of a single user picked stat
+                 selectizeInput("treeStat", "Tree Stat", choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def'))),
+        tabPanel("Supervised Learning 2", plotOutput("statSupLearn2")),
         tabPanel("Unsupervised Learning"),
         tabPanel("Information", #displays information about the app
                  h2("Pokemon Data Organizer for Project 2 of NCSU ST590 Fall 2018"),

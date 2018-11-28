@@ -13,10 +13,11 @@ library(ggplot2)
 library(tree)
 
 # Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
-# is only one type.  This translates that appropriately for the data.
+# is only one type.  This translates that appropriately for the data.  Also adds a Total Statistic setting.
 pokeData = read_csv("pokemon.csv")
 pokeData[is.na(pokeData)] = "None"
-
+pokeData <- mutate(pokeData, statTotal = Attack + Defense + Speed + HP 
+                                         + pokeData$'Sp. Def' + pokeData$'Sp. Atk') 
 
 shinyServer(function(input, output, session) {
   
@@ -54,10 +55,8 @@ shinyServer(function(input, output, session) {
       #creates histogram to download
       png(file)
       plotData <- displayData()
-      statTotals <- plotData$Attack + plotData$Defense + plotData$Speed + 
-        plotData$HP + plotData$'Sp. Atk' + plotData$'Sp. Def'
-      bins <- seq( min(statTotals), max(statTotals), length.out = 20)
-      hist(statTotals, breaks = bins, xlab = "Stat Total for Pokemon",
+      bins <- seq( min(plotData$statTotal), max(plotData$statTotal), length.out = 20)
+      hist(plotData$statTotal, breaks = bins, xlab = "Stat Total for Pokemon",
            main = "Histogram of Stat Totals")
       dev.off()
     },
@@ -67,27 +66,58 @@ shinyServer(function(input, output, session) {
   #creates histogram of total statistics of the pokemon currently selected
   output$statTotPlot <- renderPlot({
     
-    #gets data to display and establishes stat total for each pokemon
+    #gets data to display 
     plotData <- displayData()
-    statTotals <- plotData$Attack + plotData$Defense + plotData$Speed + 
-      plotData$HP + plotData$'Sp. Atk' + plotData$'Sp. Def'
     
     #creates bin sizes and creates histogram
-    bins <- seq( min(statTotals), max(statTotals), length.out = 20)
-    hist(statTotals, breaks = bins, xlab = "Stat Total for Pokemon",
+    bins <- seq( min(plotData$statTotal), max(plotData$statTotal), length.out = 20)
+    hist(plotData$statTotal, breaks = bins, xlab = "Stat Total for Pokemon",
          main = "Histogram of Stat Totals")
+  })
+  
+  #Creates Tree of stat totals
+  output$statSupLearn2 <- renderPlot({
+    
+    #gets data to display
+    plotData <- displayData()
+
+    #creates tree
+    fitTree <- tree(statTotal~ Attack, data = plotData)
+    plot(fitTree)
+    text(fitTree)
   })
   
   #Creates Tree of stat totals
   output$statSupLearn1 <- renderPlot({
     
-    #gets data to display and establishes stat total for each pokemon
+    #gets data to display
     plotData <- displayData()
-    statTotals <- plotData$Attack + plotData$Defense + plotData$Speed + 
-      plotData$HP + plotData$'Sp. Atk' + plotData$'Sp. Def'
     
-    #creates tree
-    fitTree <- tree(Attack~Defense, data = plotData)
+    #creates tree based on user input
+    if(input$treeStat == 'Attack')
+    {
+      fitTree <- tree(statTotal~ Attack, data = plotData)
+    }
+    else if(input$treeStat == 'Defense')
+    {
+      fitTree <- tree(statTotal~ Defense, data = plotData)
+    }
+    else if(input$treeStat == 'HP')
+    {
+      fitTree <- tree(statTotal~ HP, data = plotData)
+    }
+    else if(input$treeStat == 'Speed')
+    {
+      fitTree <- tree(statTotal~ Speed, data = plotData)
+    }
+    else if(input$treeStat == 'Sp. Atk')
+    {
+      fitTree <- tree(statTotal~ pokeData'Sp. Atk', data = plotData)
+    }
+    else
+    {
+      fitTree <- tree(statTotal~ pokeData$'Sp. Def', data = plotData)     
+    }
     plot(fitTree)
     text(fitTree)
   })

@@ -12,18 +12,17 @@ library(tidyverse)
 library(ggplot2)
 library(tree)
 
-# Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
-# is only one type.  This translates that appropriately for the data.  It also adds a Total Statistic setting
-# and renames data with problematic names (two words for a variable)
+# Reads in pokemon data, adds a Total Statistic setting, renames data with problematic names
+# and sorts appropriately
 pokeData = read_csv("pokemon.csv")
-pokeData[is.na(pokeData)] = "None"
 colnames(pokeData)[8] = "SpAtk"
 colnames(pokeData)[9] = "SpDef"
-pokeData <- mutate(pokeData, StatTotal = Attack + Defense + Speed + HP 
-                   + SpDef + SpAtk)  
+pokeData[is.na(pokeData)] = "N/A"
+pokeData <- mutate(pokeData, StatTotal = Attack + Defense + Speed 
+                                         + HP + SpDef + SpAtk)  
+pokeData <- pokeData[,c(1:10,13,11:12)]
 
-
-# Define UI for application that draws a histogram
+# Define UI for application 
 shinyUI(fluidPage(
   
   # Application tile
@@ -33,14 +32,11 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       h3("Enter Statistics for your Pokemon"),
-      selectizeInput("type1", "Type 1", choices = as.factor(pokeData$'Type 1')),
-      selectizeInput("type2", "Type 2", choices = as.factor(pokeData$'Type 2')),
-      numericInput("hp", "< Pokemon Hit Points", min = 0, max = 200, value = 0),
-      numericInput("att", "< Pokemon Attack", min = 0, max = 200, value = 0),
-      numericInput("def", "< Pokemon Defense", min = 0, max = 200, value = 0),
-      numericInput("spAtt", "< Pokemon Special Attack", min = 0, max = 200, value = 0),
-      numericInput("spDef", "< Pokemon Special Defense", min = 0, max = 200, value = 0),
-      numericInput("spd", "< Pokemon Speed", min = 0, max = 200, value = 0),
+      selectInput("type1", "Type 1", choices = c("All",pokeData$`Type 1`)),
+      selectInput("type2", "Type 2", choices = c("All",pokeData$`Type 2`)),
+      checkboxInput("genCheck", h4("Select Pokemon by Generation?")),
+      conditionalPanel(condition ="input.genCheck",
+                       numericInput("gen", "Generation", min = 1, max = 7, value = 1)),
       checkboxInput("modified", h4("Show Pokemon with these traits?")),
       downloadButton("dlData", "Download Pokemon List")
     ),

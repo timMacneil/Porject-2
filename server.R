@@ -12,15 +12,15 @@ library(tidyverse)
 library(ggplot2)
 library(tree)
 
-# Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
-# is only one type.  This translates that appropriately for the data.  It also adds a Total Statistic setting
-# and renames data with problematic names (two words for a variable)
+# Reads in pokemon data, adds a Total Statistic setting, renames data with problematic names
+# and sorts appropriately
 pokeData = read_csv("pokemon.csv")
-pokeData[is.na(pokeData)] = "None"
 colnames(pokeData)[8] = "SpAtk"
 colnames(pokeData)[9] = "SpDef"
-pokeData <- mutate(pokeData, StatTotal = Attack + Defense + Speed + HP 
-                   + SpDef + SpAtk) 
+pokeData[is.na(pokeData)] = "N/A"
+pokeData <- mutate(pokeData, StatTotal = Attack + Defense + Speed 
+                                         + HP + SpDef + SpAtk)
+pokeData <- pokeData[,c(1:10,13,11:12)]
 
 shinyServer(function(input, output, session) {
   
@@ -32,10 +32,32 @@ shinyServer(function(input, output, session) {
     }
     
     else{ #data has been adjusted to meet specifications given by user
-      newData <- pokeData[pokeData$`Type 1`== input$type1 & pokeData$`Type 2`== input$type2
-                          & pokeData$HP>input$hp & pokeData$Attack>input$att
-                          & pokeData$Defense>input$def & pokeData$Speed>input$spd
-                          & pokeData$SpAtk>input$spAtt & pokeData$SpDef>input$spDef,]
+      
+      # if not selecting all pokemon
+      if(input$type1!="All")
+      {
+        # if type 2 is a value
+        if(input$type2!="All"){
+          newData <- pokeData[pokeData$`Type 1`== input$type1 &
+                                pokeData$`Type 2`== input$type2,]
+        }
+        else{
+          newData <- pokeData[pokeData$`Type 1`== input$type1,]         
+        }
+      }
+      else
+      {
+        newData <- pokeData
+      }
+      
+      #if it should check the generation
+      if(input$genCheck)
+      {  
+        newData <- newData[newData$Generation == input$gen,]
+      }
+      else{
+        newData
+      }
     }
   })
   
@@ -176,13 +198,13 @@ shinyServer(function(input, output, session) {
   
   #Display for regression tree
   output$regTreeInfo <- renderText({
-    paste("Mean Stat Total Tree for", input$type1,"/", input$type2,"Pokemon split by", input$treeStat)
+    paste("Mean Stat Total Tree for selected Pokemon split by", input$treeStat)
   })
   
   #Display for regression tree
   output$regInfo <- renderText({
-    paste("Linear regression predicting Stat Total for", input$type1,"/", input$type2,
-          "Pokemon with", input$regStat, "as the predictor")
+    paste("Linear regression predicting Stat Total for selected Pokemon with", 
+          input$regStat, "as the predictor")
   })
   
   #Display for prediction data

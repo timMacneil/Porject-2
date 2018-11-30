@@ -13,11 +13,15 @@ library(ggplot2)
 library(tree)
 
 # Reads in pokemon data and converts NA values to "None".  Only 'Type 2' has NA values because the Pokemon
-# is only one type.  This translates that appropriately for the data.  Also adds a Total Statistic setting.
+# is only one type.  This translates that appropriately for the data.  It also adds a Total Statistic setting
+# and renames data with problematic names (two words for a variable)
 pokeData = read_csv("pokemon.csv")
 pokeData[is.na(pokeData)] = "None"
-pokeData <- mutate(pokeData, `Stat Total` = Attack + Defense + Speed + HP 
-                                         + pokeData$'Sp. Def' + pokeData$'Sp. Atk') 
+colnames(pokeData)[8] = "SpAtk"
+colnames(pokeData)[9] = "SpDef"
+pokeData <- mutate(pokeData, StatTotal = Attack + Defense + Speed + HP 
+                   + SpDef + SpAtk)  
+
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -31,12 +35,12 @@ shinyUI(fluidPage(
       h3("Enter Statistics for your Pokemon"),
       selectizeInput("type1", "Type 1", choices = as.factor(pokeData$'Type 1')),
       selectizeInput("type2", "Type 2", choices = as.factor(pokeData$'Type 2')),
-      numericInput("hp", "< Pokemon Hit Points", min = 1, max = 200, value = 0),
-      numericInput("att", "< Pokemon Attack", min = 1, max = 200, value = 0),
-      numericInput("def", "< Pokemon Defense", min = 1, max = 200, value = 0),
-      numericInput("spAtt", "< Pokemon Special Attack", min = 200, max = 10, value = 0),
-      numericInput("spDef", "< Pokemon Special Defense", min = 200, max = 10, value = 0),
-      numericInput("spd", "< Pokemon Speed", min = 1, max = 200, value = 0),
+      numericInput("hp", "< Pokemon Hit Points", min = 0, max = 200, value = 0),
+      numericInput("att", "< Pokemon Attack", min = 0, max = 200, value = 0),
+      numericInput("def", "< Pokemon Defense", min = 0, max = 200, value = 0),
+      numericInput("spAtt", "< Pokemon Special Attack", min = 0, max = 200, value = 0),
+      numericInput("spDef", "< Pokemon Special Defense", min = 0, max = 200, value = 0),
+      numericInput("spd", "< Pokemon Speed", min = 0, max = 200, value = 0),
       checkboxInput("modified", h4("Show Pokemon with these traits?")),
       downloadButton("dlData", "Download Pokemon List")
     ),
@@ -62,10 +66,12 @@ shinyUI(fluidPage(
                                 choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def'))),
         
         #displays Stat Total linear regression based off of single user stat 
-        tabPanel("Stat Total Linear Regression", verbatimTextOutput("regLinInfo"),
-                 plotOutput("linRegr"),
-                 selectizeInput("regStat", "Regression Stat", 
-                                choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def'))),
+        tabPanel("Stat Total Regression", verbatimTextOutput("regInfo"),
+                 plotOutput("regrLin"),
+                 selectizeInput("regStat", "Prediction Stat", 
+                                choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def')),
+                 numericInput("pred", "Predictor Value", min = 0, max = 200, value = 0),
+                 verbatimTextOutput("predInfo")),
         
         tabPanel("Unsupervised Learning"),
         

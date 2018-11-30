@@ -16,8 +16,8 @@ library(tree)
 # is only one type.  This translates that appropriately for the data.  Also adds a Total Statistic setting.
 pokeData = read_csv("pokemon.csv")
 pokeData[is.na(pokeData)] = "None"
-pokeData <- mutate(pokeData, statTotal = Attack + Defense + Speed + HP 
-                                         + pokeData$'Sp. Def' + pokeData$'Sp. Atk') 
+pokeData <- mutate(pokeData, `Stat Total` = Attack + Defense + Speed + HP 
+                                         + `Sp. Def` + `Sp. Atk`) 
 
 shinyServer(function(input, output, session) {
   
@@ -29,10 +29,10 @@ shinyServer(function(input, output, session) {
     }
     
     else{ #data has been adjusted to meet specifications given by user
-      newData <- pokeData[pokeData$'Type 1'== input$type1 & pokeData$'Type 2'== input$type2
+      newData <- pokeData[pokeData$`Type 1`== input$type1 & pokeData$`Type 2`== input$type2
                           & pokeData$HP>input$hp & pokeData$Attack>input$att
                           & pokeData$Defense>input$def & pokeData$Speed>input$spd
-                          & pokeData$'Sp. Atk'>input$spAtt & pokeData$'Sp. Def'>input$spDef,]
+                          & pokeData$`Sp. Atk`>input$spAtt & pokeData$`Sp. Def`>input$spDef,]
     }
   })
   
@@ -55,8 +55,8 @@ shinyServer(function(input, output, session) {
       #creates histogram to download
       png(file)
       plotData <- displayData()
-      bins <- seq( min(plotData$statTotal), max(plotData$statTotal), length.out = 20)
-      hist(plotData$statTotal, breaks = bins, xlab = "Stat Total for Pokemon",
+      bins <- seq( min(plotData$`Stat Total`), max(plotData$`Stat Total`), length.out = 20)
+      hist(plotData$`Stat Total`, breaks = bins, xlab = "Stat Total for Pokemon",
            main = "Histogram of Stat Totals")
       dev.off()
     },
@@ -70,25 +70,58 @@ shinyServer(function(input, output, session) {
     plotData <- displayData()
     
     #creates bin sizes and creates histogram
-    bins <- seq( min(plotData$statTotal), max(plotData$statTotal), length.out = 20)
-    hist(plotData$statTotal, breaks = bins, xlab = "Stat Total for Pokemon",
+    bins <- seq( min(plotData$`Stat Total`), max(plotData$`Stat Total`), length.out = 20)
+    hist(plotData$`Stat Total`, breaks = bins, xlab = "Stat Total for Pokemon",
          main = "Histogram of Stat Totals")
   })
   
-  #Creates Tree of stat totals
-  output$statSupLearn2 <- renderPlot({
+  #Creates linear regression model of stat totals
+  output$linRegr <- renderPlot({
     
     #gets data to display
     plotData <- displayData()
 
-    #creates tree
-    fitTree <- tree(statTotal~ Attack, data = plotData)
-    plot(fitTree)
-    text(fitTree)
+    #creates linear model based on user input and plots graph
+    if(input$regStat == 'Attack')
+    {
+      linMod <- lm(`Stat Total`~ Attack, data = plotData)
+      g <- ggplot(plotData, aes(x = Attack, y = `Stat Total`))
+      g + geom_point() + xlab("Attack") + ylab("Stat Total") + geom_smooth(method = "lm")
+    }
+    else if(input$regStat == 'Defense')
+    {
+      linMod <- lm(`Stat Total`~ Defense, data = plotData)
+      g <- ggplot(plotData, aes(x = Defense, y = `Stat Total`))
+      g + geom_point() + xlab("Defense") + ylab("Stat Total") + geom_smooth(method = "lm")
+    }
+    else if(input$regStat == 'HP')
+    {
+      linMod <- lm(`Stat Total`~ HP, data = plotData)
+      g <- ggplot(plotData, aes(x = HP, y = `Stat Total`))
+      g + geom_point() + xlab("HP") + ylab("Stat Total") + geom_smooth(method = "lm")
+    }
+    else if(input$regStat == 'Speed')
+    {
+      linMod <- lm(`Stat Total`~ Speed, data = plotData)
+      g <- ggplot(plotData, aes(x = Speed, y = `Stat Total`))
+      g + geom_point() + xlab("Speed") + ylab("Stat Total") + geom_smooth(method = "lm")
+    }
+    else if(input$regStat == 'Sp. Atk')
+    {
+      linMod <- lm(`Stat Total`~ plotData$`Sp. Atk`, data = plotData)
+      g <- ggplot(plotData, aes(x = `Sp. Atk`, y = `Stat Total`))
+      g + geom_point() + xlab("Special Attack") + ylab("Stat Total") + geom_smooth(method = "lm")
+    }
+    else
+    {
+      linMod <- lm(`Stat Total`~ plotData$`Sp. Def`, data = plotData) 
+      g <- ggplot(plotData, aes(x = `Sp. Def`, y = `Stat Total`))
+      g + geom_point() + xlab("Special Defense") + ylab("Stat Total") + geom_smooth(method = "lm")
+    }
   })
   
-  #Creates Tree of stat totals
-  output$statSupLearn1 <- renderPlot({
+  #Creates Regression Tree of stat totals
+  output$regTree <- renderPlot({
     
     #gets data to display
     plotData <- displayData()
@@ -96,30 +129,30 @@ shinyServer(function(input, output, session) {
     #creates tree based on user input
     if(input$treeStat == 'Attack')
     {
-      fitTree <- tree(statTotal~ Attack, data = plotData)
+      fitTree <- tree(`Stat Total`~ Attack, data = plotData)
     }
     else if(input$treeStat == 'Defense')
     {
-      fitTree <- tree(statTotal~ Defense, data = plotData)
+      fitTree <- tree(`Stat Total`~ Defense, data = plotData)
     }
     else if(input$treeStat == 'HP')
     {
-      fitTree <- tree(statTotal~ HP, data = plotData)
+      fitTree <- tree(`Stat Total`~ HP, data = plotData)
     }
     else if(input$treeStat == 'Speed')
     {
-      fitTree <- tree(statTotal~ Speed, data = plotData)
+      fitTree <- tree(`Stat Total`~ Speed, data = plotData)
     }
     else if(input$treeStat == 'Sp. Atk')
     {
-      fitTree <- tree(statTotal~ pokeData$'Sp. Atk', data = plotData)
+      fitTree <- tree(`Stat Total`~ plotData$`Sp. Atk`, data = plotData)
     }
     else
     {
-      fitTree <- tree(statTotal~ pokeData$'Sp. Def', data = plotData)     
+      fitTree <- tree(`Stat Total`~ plotData$`Sp. Def`, data = plotData)     
     }
-    plot(fitTree)
-    text(fitTree, splits = FALSE, digits = 3)
+    plot(fitTree, uniform = TRUE)
+    text(fitTree)
   })
   
   #creates plots for attack and defense of the pokemon currently selected
@@ -143,6 +176,16 @@ shinyServer(function(input, output, session) {
     paste0("Total Attack=", input$plotClick$x, "\nTotal Defense=", input$plotClick$y)
   })
   
+  #Display for regression tree
+  output$regTreeInfo <- renderText({
+    paste("Mean Stat Total Tree for", input$type1,"/", input$type2,"Pokemon split by", input$treeStat)
+  })
+  
+  #Display for regression tree
+  output$regLinInfo <- renderText({
+    paste("Linear regression predicting Stat Total for", input$type1,"/", input$type2,
+          "Pokemon with", input$regStat, "as the predictor")
+  }) 
   output$webLink <- renderUI({
     url <- a("the Hackathon challenge", href="https://www.kaggle.com/terminus7/pokemon-challenge")
     tagList("Data set was provided from kaggle by T7 as part of ", url)

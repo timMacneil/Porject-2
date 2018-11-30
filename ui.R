@@ -16,7 +16,7 @@ library(tree)
 # is only one type.  This translates that appropriately for the data.  Also adds a Total Statistic setting.
 pokeData = read_csv("pokemon.csv")
 pokeData[is.na(pokeData)] = "None"
-pokeData <- mutate(pokeData, statTotal = Attack + Defense + Speed + HP 
+pokeData <- mutate(pokeData, `Stat Total` = Attack + Defense + Speed + HP 
                                          + pokeData$'Sp. Def' + pokeData$'Sp. Atk') 
 
 # Define UI for application that draws a histogram
@@ -44,16 +44,33 @@ shinyUI(fluidPage(
     # Show a plot of the relevant pokemon
     mainPanel(
       tabsetPanel(
-        tabPanel("Stats of Pokemon",tableOutput("list")), #displays pokemon data
-        tabPanel("Histogram of Stat Totals", plotOutput("statTotPlot"), #displays histogram of stat totals of described pokemon
+        #displays pokemon data
+        tabPanel("Stats of Pokemon",tableOutput("list")),
+        
+        #displays histogram of stat totals of described pokemon
+        tabPanel("Histogram of Stat Totals", plotOutput("statTotPlot"),
                  downloadButton("dlPng", "Download Histogram")), 
-        tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"), #displays plots display stat trends
+        
+        #displays plots display stat trends
+        tabPanel("Plots Comparing Offense/Defense", plotOutput("statCompPlot", click = "plotClick"),
                  verbatimTextOutput("pokeInfo")),
-        tabPanel("Stat Total Tree", plotOutput("statSupLearn1"),  #displays Stat Total tree based off of a single user picked stat
-                 selectizeInput("treeStat", "Tree Stat", choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def'))),
-        tabPanel("Supervised Learning 2", plotOutput("statSupLearn2")),
+        
+        #displays Stat Total tree based off of a single user picked stat
+        tabPanel("Stat Total Regression Tree", verbatimTextOutput("regTreeInfo"),  
+                 plotOutput("regTree"),
+                 selectizeInput("treeStat", "Tree Stat", 
+                                choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def'))),
+        
+        #displays Stat Total linear regression based off of single user stat 
+        tabPanel("Stat Total Linear Regression", verbatimTextOutput("regLinInfo"),
+                 plotOutput("linRegr"),
+                 selectizeInput("regStat", "Regression Stat", 
+                                choices = c('HP','Attack', 'Defense', 'Speed', 'Sp. Atk', 'Sp. Def'))),
+        
         tabPanel("Unsupervised Learning"),
-        tabPanel("Information", #displays information about the app
+        
+        #displays information about the app
+        tabPanel("Information", 
                  h2("Pokemon Data Organizer for Project 2 of NCSU ST590 Fall 2018"),
                  p("This App was constructed by Tim MacNeil for Project 2 of the NCSU ST590 course in Fall 2018.", 
                  "It loads a data file of information pertinent to pokemon.  It allows the user to sort through the ", 

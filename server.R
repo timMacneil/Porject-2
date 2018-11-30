@@ -11,6 +11,7 @@ library(shiny)
 library(tidyverse)
 library(ggplot2)
 library(tree)
+library(class)
 
 # Reads in pokemon data, adds a Total Statistic setting, renames data with problematic names
 # and sorts appropriately
@@ -58,6 +59,15 @@ shinyServer(function(input, output, session) {
       else{
         newData
       }
+      
+      #if it should check for legendaries
+      if(input$legCheck)
+      {  
+        newData <- newData[newData$Legendary=="True",]
+      }
+      else{
+        newData
+      }
     }
   })
   
@@ -80,7 +90,7 @@ shinyServer(function(input, output, session) {
       #creates histogram to download
       png(file)
       plotData <- displayData()
-      bins <- seq( min(plotData$StatTotal), max(plotData$StatTotal), length.out = 20)
+      bins <- seq( min(plotData$StatTotal), max(plotData$StatTotal), length.out = 25)
       hist(plotData$`Stat Total`, breaks = bins, xlab = "Stat Total for Pokemon",
            main = "Histogram of Stat Totals")
       dev.off()
@@ -95,7 +105,7 @@ shinyServer(function(input, output, session) {
     plotData <- displayData()
     
     #creates bin sizes and creates histogram
-    bins <- seq( min(plotData$StatTotal), max(plotData$StatTotal), length.out = 20)
+    bins <- seq( min(plotData$StatTotal), max(plotData$StatTotal), length.out = 25)
     hist(plotData$StatTotal, breaks = bins, xlab = "Stat Total for Pokemon",
          main = "Histogram of Stat Totals")
   })
@@ -186,6 +196,26 @@ shinyServer(function(input, output, session) {
     g + geom_point() + xlab("Combined Attack Stats") + ylab("Combined Defense Stats")
   })
   
+  #creates hierarchical cluster diagram of total statistics of the pokemon currently selected
+  output$clustPlot <- renderPlot({
+    
+    #gets data to display 
+    plotData <- displayData()
+    
+    #plot the cluster
+    hierClust <- hclust(dist(data.frame(plotData$Attack, plotData$Defense, plotData$HP,
+                                        plotData$Speed, plotData$SpAtk, plotData$SpDef)
+                                        ),method = "average")
+    trimmed <- cutree(hierClust, k=input$clust)
+    if(input$clustStat=="Plot"){
+      ggplot(data = plotData, aes(x=Attack, y=Defense)) + 
+             geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+    }
+    else{
+      plot(hierClust)
+    }
+  })
+  
   # table for pokemon data
   output$list <- renderTable({   
     displayData()
@@ -201,7 +231,7 @@ shinyServer(function(input, output, session) {
     paste("Mean Stat Total Tree for selected Pokemon split by", input$treeStat)
   })
   
-  #Display for regression tree
+  #Display for linear regression
   output$regInfo <- renderText({
     paste("Linear regression predicting Stat Total for selected Pokemon with", 
           input$regStat, "as the predictor")

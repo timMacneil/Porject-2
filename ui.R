@@ -11,6 +11,7 @@ library(shiny)
 library(tidyverse)
 library(ggplot2)
 library(tree)
+library(class)
 
 # Reads in pokemon data, adds a Total Statistic setting, renames data with problematic names
 # and sorts appropriately
@@ -34,9 +35,10 @@ shinyUI(fluidPage(
       h3("Enter Statistics for your Pokemon"),
       selectInput("type1", "Type 1", choices = c("All",pokeData$`Type 1`)),
       selectInput("type2", "Type 2", choices = c("All",pokeData$`Type 2`)),
+      checkboxInput("legCheck", h4("Select Legendary Pokemon?")),
       checkboxInput("genCheck", h4("Select Pokemon by Generation?")),
       conditionalPanel(condition ="input.genCheck",
-                       numericInput("gen", "Generation", min = 1, max = 7, value = 1)),
+                       numericInput("gen", "Generation", min = 1, max = 6, value = 1)),
       checkboxInput("modified", h4("Show Pokemon with these traits?")),
       downloadButton("dlData", "Download Pokemon List")
     ),
@@ -69,8 +71,13 @@ shinyUI(fluidPage(
                  numericInput("pred", "Predictor Value", min = 0, max = 200, value = 0),
                  verbatimTextOutput("predInfo")),
         
-        tabPanel("Unsupervised Learning"),
-        
+        #displays clusters for stat totals by user defined clusters
+        tabPanel("Stat Total Clustering", verbatimTextOutput("clustInfo"),
+                 plotOutput("clustPlot"),
+                 selectizeInput("clustStat", "What type of display?", 
+                                choices = c('Dendrogram','Plot')),
+                 sliderInput("clust", "Number of clusters", min = 1, max = 15, step = 1, value = 3)),
+          
         #displays information about the app
         tabPanel("Information", 
                  h2("Pokemon Data Organizer for Project 2 of NCSU ST590 Fall 2018"),

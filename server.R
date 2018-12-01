@@ -201,18 +201,93 @@ shinyServer(function(input, output, session) {
     
     #gets data to display 
     plotData <- displayData()
-    
-    #plot the cluster
     hierClust <- hclust(dist(data.frame(plotData$Attack, plotData$Defense, plotData$HP,
                                         plotData$Speed, plotData$SpAtk, plotData$SpDef)
                                         ),method = "average")
-    trimmed <- cutree(hierClust, k=input$clust)
-    if(input$clustStat=="Plot"){
-      ggplot(data = plotData, aes(x=Attack, y=Defense)) + 
-             geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+    #If statements below display graphs dependant on user input
+    
+    #If attack is chosen
+    if(input$clustStat=="Attack"){
+      if(input$clustType=="Height"){
+        trimmed <- cutree(hierClust, h=input$heightClu)
+        ggplot(data = plotData, aes(x=Attack, y=StatTotal)) + 
+               geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+      else{
+        trimmed <- cutree(hierClust, k=input$clustNum)
+        ggplot(data = plotData, aes(x=Attack, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
     }
+    
+    #if defense is chosen
+    else if(input$clustStat=="Defense"){
+      if(input$clustType=="Height"){
+        trimmed <- cutree(hierClust, h=input$heightClu)
+        ggplot(data = plotData, aes(x=Defense, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+      else{
+        trimmed <- cutree(hierClust, k=input$clustNum)
+        ggplot(data = plotData, aes(x=Defense, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+    }
+    
+    #if HP is chosen
+    else if(input$clustStat=="HP"){
+      if(input$clustType=="Height"){
+        trimmed <- cutree(hierClust, h=input$heightClu)
+        ggplot(data = plotData, aes(x=HP, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+      else{
+        trimmed <- cutree(hierClust, k=input$clustNum)
+        ggplot(data = plotData, aes(x=HP, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+    }
+    
+    #if Speed is chosen
+    else if(input$clustStat=="Speed"){
+      if(input$clustType=="Height"){
+        trimmed <- cutree(hierClust, h=input$heightClu)
+        ggplot(data = plotData, aes(x=Speed, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+      else{
+        trimmed <- cutree(hierClust, k=input$clustNum)
+        ggplot(data = plotData, aes(x=Speed, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+    }
+    
+    #if SpAtk is chosen
+    else if(input$clustStat=="Sp. Atk"){
+      if(input$clustType=="Height"){
+        trimmed <- cutree(hierClust, h=input$heightClu)
+        ggplot(data = plotData, aes(x=SpAtk, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+      else{
+        trimmed <- cutree(hierClust, k=input$clustNum)
+        ggplot(data = plotData, aes(x=SpAtk, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+    }
+    
+    #if SpDef is chosen
     else{
-      plot(hierClust)
+      if(input$clustType=="Height"){
+        trimmed <- cutree(hierClust, h=input$heightClu)
+        ggplot(data = plotData, aes(x=SpDef, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }
+      else{
+        trimmed <- cutree(hierClust, k=input$clustNum)
+        ggplot(data = plotData, aes(x=SpDef, y=StatTotal)) + 
+          geom_point(aes(col=as.factor(trimmed))) + labs(colour = "Clusters")
+      }     
     }
   })
   
